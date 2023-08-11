@@ -1,0 +1,16 @@
+* TODO TLS config
+tls key and cert need a sane default and a cli param
+* TODO Copy image from remote
+handle request will have to have a reciever channel open to recieve
+image path from main thread.
+** main loop will get command to send image
+** image path will get sent back along channel
+** thread with send stream will open file and stream data back to client
+* TODO sqlite db
+** hide
+** rotation
+* TODO recur sub directories
+* TODO send current image onConnection
+* TODO Error enums
+* TODO logging for client
+* TODO req / resp factory
