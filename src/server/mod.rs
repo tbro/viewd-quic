@@ -4,6 +4,7 @@ mod cursor;
 mod window;
 mod handlers;
 mod quic_service;
+mod pageant;
 
 use std::{
     path::Path,
@@ -49,6 +50,8 @@ impl Server {
             self.control.handle_request()?;
             // register window events
             self.control.handle_events();
+	    // handle pageant mode
+	    self.control.pageant();
         }
     }
 }

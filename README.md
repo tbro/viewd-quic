@@ -24,6 +24,7 @@ Currently supported commands are
     * `<-` (arrow left) previous image
 	* `f`  fullscreen
 	* `r`  rotate
+	* `p`  pageant mode (automatically scroll through the images)
     * `q`  quit (the client)
 
 ## dependencies
