@@ -28,7 +28,6 @@ impl PageantMode {
     }
     pub fn should_update(&self) -> bool {
         if let Some(instant) = self.instant {
-            // println!("{:?}", Instant::now() - instant);
             Instant::now() - instant >= Duration::from_millis(self.timeout)
         } else {
             false

@@ -18,10 +18,6 @@ use crate::{
     server::window::Window,
 };
 
-/// A type for data coming from command handler to be used to
-/// initialize a response.
-type ResponseData<'a> = (Option<PathBuf>, Option<Vec<u8>>, &'a str);
-
 /// Issues commands from the network to the Navigator and Window.
 pub struct Controller {
     /// Navigator holds a cursor for moving through list of Image files
@@ -66,42 +62,45 @@ impl Controller {
         let _result = self.handle_command(ServerCommand::Prev);
         Ok(())
     }
-    /// Handle network request
+    /// Parse request and send response back to que Quic Service
     pub fn handle_request(&mut self) -> Result<()> {
         while let Ok(bytes) = self.rx_req.try_recv() {
             let request = Request::from_bytes(bytes)?;
             debug!("request: {:?}", request);
 
-            if let Ok((path, data, message)) = self.handle_command(request.command()) {
-                let resp = Response::new(path, data, message);
-                debug!("response {:?}", resp);
-                self.tx_res.send(resp.to_bytes()?.into())?;
-            }
+            let p = self.nav.image_path();
+            let resp = match self.handle_command(request.command()) {
+                Ok(maybe_data) => {
+                    let message = "Success";
+                    Response::new(Some(p), maybe_data, message)
+                }
+                Err(e) => {
+                    let message = format! {"Error: {}", e};
+                    Response::new(Some(p), None, &message)
+                }
+            };
+            self.tx_res.send(resp.to_bytes()?.into())?;
         }
         Ok(())
     }
-    /// Handle client originating commands
-    pub fn handle_command(&mut self, command: ServerCommand) -> Result<ResponseData> {
-        let result = match command {
+    /// Call navigator and window commands according to network request.
+    pub fn handle_command(&mut self, command: ServerCommand) -> Result<Option<Vec<u8>>> {
+        match command {
             ServerCommand::Fetch => {
                 let data = self.nav.image_data()?;
-                // FIXME we don't need to return image path
-                // because it is available on the insance. And
-                // we can also determine success/failure based on error
-                // a level up. So we should just return Option<data>
-                (Some(self.nav.image_path()), Some(data), "Success")
+                Ok(Some(data))
             }
             ServerCommand::Fullscreen => {
                 self.win.fullscreen_toggle(&self.nav.image)?;
-                (Some(self.nav.image_path()), None, "Success")
+                Ok(None)
             }
             ServerCommand::Rotate => {
                 self.win.rotate(1.0, &self.nav.image)?;
-                (Some(self.nav.image_path()), None, "Success")
+                Ok(None)
             }
             ServerCommand::Pageant => {
                 self.pageant.toggle();
-                (Some(self.nav.image_path()), None, "Success")
+                Ok(None)
             }
             ServerCommand::Next => {
                 // loop until we get a supported image. Test if image
@@ -119,7 +118,7 @@ impl Controller {
                 };
 
                 self.win.update(image)?;
-                (Some(image.to_path_buf()), None, "Success")
+                Ok(None)
             }
             ServerCommand::Prev => {
                 // loop until we get a supported image. Test if image
@@ -136,11 +135,9 @@ impl Controller {
                     }
                 };
                 self.win.update(image)?;
-                (Some(image.to_path_buf()), None, "Success")
+                Ok(None)
             }
-        };
-
-        Ok(result)
+        }
     }
     /// Handle Window events
     pub fn handle_events(&mut self) {
