@@ -113,6 +113,7 @@ mod tests {
         let p = get_paths();
         let mut v = PathCursor::new(p);
         assert_eq!(v.prev(), Some(&Path::new("./bar/foo.txt").to_path_buf()));
+        assert_eq!(v.prev(), Some(&Path::new("./bim/bam.txt").to_path_buf()));
         assert_eq!(v.prev(), Some(&Path::new("./foo/bar.txt").to_path_buf()));
         assert_eq!(v.prev(), Some(&Path::new("./bar/foo.txt").to_path_buf()));
         Ok(())
