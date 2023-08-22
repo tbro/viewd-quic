@@ -1,5 +1,5 @@
 # viewd
-A image veiwer server and client for viewing images on a remote box (presumably with monitor connected). A learning project that filled a personal niche. Probably not for general use, though it is useful to me. It uses quic for network commnunication and sdl2 for image dispaly. 
+A image veiwer server and client for viewing images on a remote box (presumably with monitor connected). An experiment project that filled a personal niche. *Not* for general use. It uses sdl2 for image dispaly and quic for network commnunication (for no good reason, I just wanted to learn a little about quic). 
 
 Only tested on linux.
 
